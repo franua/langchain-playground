@@ -7,9 +7,6 @@ from langchain.prompts import PromptTemplate
 from langchain.chains.llm import LLMChain
 
 
-# from langchain import hub
-
-# MODEL = "llama3:latest"
 MODEL = "dolphin-mixtral:latest"
 TEMPERATURE = 0.8
 VERBOSE = True
@@ -23,7 +20,7 @@ PERSONS = [
 ]
 
 
-def get_person():
+def get_person() -> str:
     p: str = q.select("Who do you want to talk to?", choices=PERSONS).ask()
     return PERSONS[random.randint(0, len(PERSONS) - 2)] if p.find("random") != -1 else p
 
@@ -35,11 +32,13 @@ def get_question() -> str:
     ).ask()
 
 
-def get_subject():
+def get_subject() -> str:
     return q.text("What's the subject of your question?").ask()
 
 
-def create_ollama_instance(impersonate: str = "a knowledgable and supportive AI"):
+def create_ollama_instance(
+    impersonate: str = "a knowledgable and supportive AI",
+) -> Ollama:
     return Ollama(
         model=MODEL,
         system=f"You are a helpful assistant who speaks like {impersonate}",
@@ -58,7 +57,7 @@ def create_prompt_template(
     )
 
 
-def create_llm_chain(ollama, prompt):
+def create_llm_chain(ollama, prompt) -> LLMChain:
     return LLMChain(llm=ollama, prompt=prompt)
 
 
@@ -69,17 +68,11 @@ def main(person: str = None, question: str = None, subject: str = None):
     subject = get_subject() if subject is None else subject
 
     print()
-    # impersonate = PERSONS[random.randint(1, 3)]
-    # print(f"Hello, I am {impersonate}")
     print(f"Hello, I am {person}.\n")
 
     ollama = create_ollama_instance(person)
     prompt = create_prompt_template(tempplate=question)
     chain = create_llm_chain(ollama, prompt)
-
-    # print("-" * 80 + "\n")
-    # subject = input("What subject do you want to learn an interesting fact about?\n")
-    # print()
 
     try:
         chain.invoke(subject)
